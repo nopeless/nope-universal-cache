@@ -343,11 +343,19 @@ function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
   return Promise.resolve(value) === value;
 }
 
-class CacheManager<T> {
+class CacheManager<T> implements CacheInterface<T | Promise<T>> {
   protected promiseCache: { [key: string]: Promise<T> } = Object.create(null);
   constructor(protected options, public caches: CacheInterface<T>[]) {}
-  has(key: string): boolean {
-    return this.caches.some((cache) => cache.has(key));
+  async has(key: string): Promise<boolean> {
+    if (this.promiseCache[key] !== undefined) {
+      return true;
+    }
+    for (const cache of this.caches) {
+      if (await cache.has(key)) {
+        return true;
+      }
+    }
+    return false;
   }
   async set(key: string, value: T | Promise<T>) {
     if (isPromise(value)) {
@@ -367,7 +375,6 @@ class CacheManager<T> {
       return Promise.any(this.caches.map((cache) => cache.set(key, value)));
     }
   }
-
   async get(key: string): Promise<T | undefined> {
     const missed: CacheInterface<T>[] = [];
     for (const cache of this.caches) {
@@ -386,6 +393,14 @@ class CacheManager<T> {
       missed.push(cache);
     }
     return undefined;
+  }
+  async del(key: string): Promise<void> {
+    await Promise.all(this.caches.map((cache) => cache.del(key)));
+    return;
+  }
+  async clear(): Promise<void> {
+    await Promise.all(this.caches.map((cache) => cache.clear()));
+    return;
   }
 }
 
