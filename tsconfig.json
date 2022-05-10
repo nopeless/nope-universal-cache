@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "types": ["node", "mocha", "chai"],
+    "types": [
+      "node",
+      "mocha",
+      "chai"
+    ],
     "esModuleInterop": true,
-    "outDir":  "./dist",
+    "outDir": "./dist",
     "target": "es2022",
     "module": "es2022",
     "resolveJsonModule": true,
@@ -17,8 +21,12 @@
     "esm": true,
   },
   "include": [
-    "./src/**/*.ts"
-, "archive/base-cache.ts"  ],
-  "exclude": ["./node_modules", "./**/*.spec.ts"],
+    "./src/**/*.ts",
+    "archive/base-cache.ts"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./**/*.spec.ts"
+  ],
   "rootDir": "./src",
 }
