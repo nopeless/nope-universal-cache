@@ -15,10 +15,11 @@
     "declarationMap": true,
     "moduleResolution": "node",
     "strictNullChecks": true,
+    "strict": true
   },
   "ts-node": {
     "files": true,
-    "esm": true,
+    "esm": true
   },
   "include": [
     "./src/**/*.ts",
@@ -28,5 +29,5 @@
     "./node_modules",
     "./**/*.spec.ts"
   ],
-  "rootDir": "./src",
+  "rootDir": "./src"
 }
