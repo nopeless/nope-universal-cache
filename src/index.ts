@@ -19,6 +19,9 @@ type Timeout = NodeJS.Timeout & {
   _idleTimeout: number;
 };
 
+function msForTtl(v: number | string): number;
+function msForTtl(v: undefined): undefined;
+function msForTtl(v: number | string | undefined): number | undefined;
 function msForTtl(v: number | string | undefined): number | undefined {
   if (v === undefined) return undefined;
   if (typeof v !== `number`) {
@@ -78,7 +81,7 @@ interface CacheInterface<T> {
 class BaseCache {
   public ttl: number;
   constructor(options: { ttl?: TtlOption } = {}) {
-    this.ttl = msForTtl(options.ttl ?? `1h`) as number;
+    this.ttl = msForTtl(options.ttl ?? `1h`);
   }
 }
 
@@ -192,7 +195,7 @@ class FileSystemCache<T> extends BaseCache implements CacheInterface<T> {
       hashFunction?: (key: string) => string;
 
       isShared?: boolean;
-    }
+    } = {}
   ) {
     super(options);
 
@@ -244,13 +247,14 @@ class FileSystemCache<T> extends BaseCache implements CacheInterface<T> {
   async read(
     hash: string
   ): Promise<undefined | Awaited<ReturnType<typeof fsp[`readFile`]>>> {
-    return fsp
-      .readFile(path.join(this.cachePath, hash))
-      .catch((e) =>
-        this.fileReadError
-          ? (this.fileReadError(e) as undefined)
-          : Promise.reject(e)
-      );
+    return fsp.readFile(path.join(this.cachePath, hash)).catch((e) => {
+      if (e.code === `ENOENT`) {
+        return undefined;
+      }
+      return this.fileReadError
+        ? (this.fileReadError(e) as undefined)
+        : Promise.reject(e);
+    });
   }
 
   /**
@@ -277,7 +281,7 @@ class FileSystemCache<T> extends BaseCache implements CacheInterface<T> {
     const promises = dir.map((hash) =>
       fsp.stat(path.join(this.cachePath, hash)).then((stat): void => {
         if (!stat.isFile()) return void this.unlink(hash);
-        const ttl = stat.atimeMs - Date.now() + this.ttl;
+        const ttl = msForTtl(stat.atimeMs - Date.now() + this.ttl);
         if (ttl < 0) return;
         this.mapping.set(
           hash,
@@ -417,6 +421,7 @@ class CacheManager<T> implements CacheInterface<T | Promise<T>> {
     promises.push(
       Promise.all(ttls.slice(hitIndex)).then((values) => {
         const caches = this.caches.slice(hitIndex);
+        if (values.length === 0) return;
         // Get index of value with highest value
         const maxIndex = values.reduce((acc, cur, index) =>
           acc === undefined ? 0 : cur > values[acc] ? index : acc
