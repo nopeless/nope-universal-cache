@@ -5,28 +5,24 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const f = cacheLib.ProxyCache<string>(
-  new cacheLib.Cache([
-    new cacheLib.PromiseCache(),
-    new cacheLib.MemoryCache(),
-    new cacheLib.FileSystemCache(),
-    new cacheLib.GeneratorCache({
-      generator: async (key) => {
-        console.log(`HIT`);
-        await sleep(1000);
-        return `Generated ${key}`;
-      },
-    }),
-  ])
-);
+const f = new cacheLib.CacheManager<string>([
+  new cacheLib.MemoryCache(),
+  new cacheLib.FileSystemCache(),
+]);
 
 await sleep(1000);
 
-const context = f[`hello`];
+const context = f.get(`hello`);
+
+await f.set(`hello`, `world`);
+
 console.log(context);
 
 context.then((v) => {
   console.log(v);
+  f.get(`hello`).then((v) => {
+    console.log(v);
+  });
 });
 
 sleep(1000);
