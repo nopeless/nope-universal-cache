@@ -23,7 +23,6 @@
   },
   "include": [
     "./src/**/*.ts",
-    "archive/base-cache.ts"
   ],
   "exclude": [
     "./node_modules",
