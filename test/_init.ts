@@ -1,5 +1,6 @@
 import path from "path";
 import rimraf from "rimraf";
+import { Suite } from "mocha";
 
 const CACHE_DIR = path.resolve(process.cwd(), `cache`);
 
@@ -13,9 +14,12 @@ export const mochaHooks = {
     clean();
   },
   afterAll: function () {
-    let topParent = this.test;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let topParent = (this as any).test;
+
     while (topParent.parent) topParent = topParent.parent;
-    function isFailed(suite) {
+
+    function isFailed(suite: Suite) {
       // Suites are recursive
       for (const s of suite.suites) {
         if (isFailed(s)) return true;

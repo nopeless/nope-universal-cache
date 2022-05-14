@@ -5,12 +5,19 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+const mem = new cacheLib.MemoryCache<string>({
+  ttl: `10s`,
+});
+
 const f = new cacheLib.CacheManager<string>([
-  new cacheLib.MemoryCache(),
-  new cacheLib.FileSystemCache(),
+  mem,
+  // new cacheLib.FileSystemCache({
+  //   basePath: `./test/`,
+  //   ttl: `30s`,
+  // }),
 ]);
 
-await sleep(1000);
+await sleep(0);
 
 const context = f.get(`hello`);
 
@@ -25,4 +32,10 @@ context.then((v) => {
   });
 });
 
-sleep(1000);
+setInterval(() => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  console.log(mem.mapping);
+}, 1000);
+
+// sleep(1000);
