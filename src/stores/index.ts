@@ -1,3 +1,1 @@
-import { MemoryStore } from "./memory-store.js";
-
-export { MemoryStore };
+export { MemoryStore } from "./memory-store.js";

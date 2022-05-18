@@ -16,7 +16,12 @@ interface CacheInterface<T> {
   set(key: string, value: T, options?: { ttl?: TtlOption }): Promise<T>;
 }
 
-class IndependentStoreCacheWrapper<T> implements CacheInterface<T> {
+class CacheWrapper {}
+
+class IndependentStoreCacheWrapper<T>
+  extends CacheWrapper
+  implements CacheInterface<T>
+{
   protected ttl: number;
   protected cacheEntryPrototype: {
     readonly ttl: {
@@ -26,14 +31,14 @@ class IndependentStoreCacheWrapper<T> implements CacheInterface<T> {
 
   public entries = new Map<string, CacheEntry>();
 
-  constructor(public store: GenericStore<T>, options: { ttl?: TtlOption }) {
-    this.ttl = msForTtl(options.ttl ?? `10s`);
+  constructor(public store: GenericStore<T>, options?: { ttl?: TtlOption }) {
+    super();
+    this.ttl = msForTtl(options?.ttl ?? `10s`);
 
     const o = {
       ttl: {},
     };
     Reflect.defineProperty(o.ttl, `value`, {
-      writable: false,
       get: () => this.ttl,
     });
     this.cacheEntryPrototype = o as {
@@ -49,7 +54,11 @@ class IndependentStoreCacheWrapper<T> implements CacheInterface<T> {
     return this.store.read(key);
   }
 
-  async set(key: string, value: T, options: { ttl?: TtlOption }): Promise<T> {
+  async set(
+    key: string,
+    value: T,
+    options: { ttl?: TtlOption } = {}
+  ): Promise<T> {
     const entry = this.entries.get(key);
     if (entry) {
       // TODO remove after unit testing
@@ -97,4 +106,9 @@ class IndependentStoreCacheWrapper<T> implements CacheInterface<T> {
   }
 }
 
-export { CacheInterface, CacheEntry, IndependentStoreCacheWrapper };
+export {
+  CacheInterface,
+  CacheEntry,
+  IndependentStoreCacheWrapper,
+  CacheWrapper,
+};

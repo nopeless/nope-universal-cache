@@ -1,12 +1,24 @@
-import type { CacheInterface, CacheEntry } from "./cache-wrapper";
+import {
+  CacheInterface,
+  CacheEntry,
+  CacheWrapper,
+  IndependentStoreCacheWrapper,
+} from "./cache-wrapper.js";
 import { computedRef } from "./reactive.js";
+import { GenericStore } from "./types.js";
 
 class CacheManager<T> implements CacheInterface<T> {
   // In reality CacheEntry is now a computed ref now
   public entries = new Map<string, CacheEntry>();
-
-  constructor(public caches: CacheInterface<T>[]) {
-    // constructor
+  public caches: CacheInterface<T>[];
+  constructor(caches: (CacheInterface<T> | GenericStore<T>)[]) {
+    this.caches = caches.map((v) => {
+      if (v instanceof CacheWrapper) {
+        return v as CacheInterface<T>;
+      } else {
+        return new IndependentStoreCacheWrapper(v as GenericStore<T>);
+      }
+    });
   }
 
   async get(key: string): Promise<T | undefined> {
