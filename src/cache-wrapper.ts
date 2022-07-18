@@ -74,15 +74,13 @@ class IndependentStoreCacheWrapper<T>
       newEntry.key = key;
       newEntry.createdAt = Date.now();
       newEntry.modifiedAt = newEntry.createdAt;
-      newEntry.ttl = new Ref(0);
-      if (options.ttl) {
-        // Self property
-        newEntry.ttl.value = msForTtl(options.ttl);
-      }
+
+      newEntry.ttl = new Ref(msForTtl(options.ttl ?? this.ttl));
+
       newEntry.timeout = setTimeout(() => {
         this.del(key);
         newEntry.timeout = null;
-      }, newEntry.ttl).unref();
+      }, newEntry.ttl.value).unref();
 
       this.entries.set(key, newEntry);
 
