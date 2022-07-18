@@ -29,7 +29,7 @@ describe(`CacheManager`, function () {
   it(`should work (promise)`, async function () {
     const c = new CacheManagerPromise<string>([
       new IndependentStoreCacheWrapper(new MemoryStore(), {
-        ttl: `5ms`,
+        ttl: `10ms`,
       }),
     ]);
 
@@ -48,6 +48,9 @@ describe(`CacheManager`, function () {
       })()
     );
 
+    await sleep(2);
     expect(await c.get(`foo`)).to.equal(`bar`);
+    await sleep(7);
+    expect(await c.get(`foo`)).to.equal(undefined);
   });
 });
