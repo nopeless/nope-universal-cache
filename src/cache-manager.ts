@@ -1,5 +1,6 @@
 import { CacheInterface, CacheEntry } from "./cache-wrapper.js";
 import { computedRef } from "./reactive.js";
+import { isPromise } from "./util.js";
 
 class CacheManager<T> implements CacheInterface<T> {
   // In reality CacheEntry is now a computed ref now
@@ -86,11 +87,11 @@ class CacheManager<T> implements CacheInterface<T> {
   }
 }
 
-class CacheManagerPromise<T> extends CacheManager<Promise<T> | T> {
+class CacheManagerPromise<T> extends CacheManager<T> {
   public mapping: { [key: string]: Promise<T> } = Object.create(null);
 
   async set(key: string, value: T | Promise<T>): Promise<T> {
-    if (value === Promise.resolve(value)) {
+    if (isPromise(value)) {
       this.mapping[key] = value;
       return value
         .then((v) => {
