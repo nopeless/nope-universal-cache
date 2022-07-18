@@ -100,9 +100,13 @@ class CacheManagerPromise<T> extends CacheManager<Promise<T> | T> {
           delete this.mapping[key];
         });
     } else {
-      super.set(key, value);
-      return value;
+      return super.set(key, value);
     }
+  }
+
+  async get(key: string): Promise<T | undefined> {
+    if (key in this.mapping) return this.mapping[key];
+    return super.get(key);
   }
 }
 
