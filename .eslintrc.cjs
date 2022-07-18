@@ -11,7 +11,7 @@ module.exports = {
     es6: true,
     node: true,
   },
-  ignorePatterns: [`dist`],
+  ignorePatterns: [`dist`, `?.*.*`, `archive`],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: `module`,
